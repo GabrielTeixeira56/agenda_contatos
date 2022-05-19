@@ -1,9 +1,9 @@
 // ignore_for_file: prefer_const_constructors
-
 import 'dart:io';
 
 import 'package:agenda_contatos/helpers/contact_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ContactPage extends StatefulWidget {
   final Contact contact;
@@ -80,6 +80,16 @@ class _ContactPageState extends State<ContactPage> {
                     ),
                   ),
                 ),
+                onTap: () {
+                  ImagePicker.pickImage(source: ImageSource.gallery)
+                      .then((file) {
+                    if (file == null) {
+                      return;
+                    } else {
+                      _editingContact.img = file.path;
+                    }
+                  });
+                },
               ),
               TextField(
                 controller: _nameController,
@@ -96,6 +106,7 @@ class _ContactPageState extends State<ContactPage> {
                 controller: _emailController,
                 decoration: InputDecoration(labelText: 'E-mail'),
                 onChanged: (text) {
+                  _userEdited = true;
                   _editingContact.email = text;
                 },
                 keyboardType: TextInputType.emailAddress,
@@ -104,6 +115,7 @@ class _ContactPageState extends State<ContactPage> {
                 controller: _phoneController,
                 decoration: InputDecoration(labelText: 'Phone'),
                 onChanged: (text) {
+                  _userEdited = true;
                   _editingContact.phone = text;
                 },
                 keyboardType: TextInputType.phone,
@@ -124,14 +136,13 @@ class _ContactPageState extends State<ContactPage> {
             title: Text('Descartar Alterações?'),
             content: Text('Se sair as alterações serão perdidas.'),
             actions: <Widget>[
-              //TODO: Alterar widget deprecated
-              FlatButton(
+              TextButton(
                 child: Text('Cancelar'),
                 onPressed: () {
                   Navigator.pop(context);
                 },
               ),
-              FlatButton(
+              TextButton(
                 child: Text('Sim'),
                 onPressed: () {
                   Navigator.pop(context);

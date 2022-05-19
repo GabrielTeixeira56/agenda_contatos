@@ -1,9 +1,12 @@
-// ignore_for_file: prefer_const_declarations, prefer_const_constructors
+// ignore_for_file: prefer_const_declarations, prefer_const_constructors,  prefer_const_literals_to_create_immutables
 import 'dart:io';
 
 import 'package:agenda_contatos/helpers/contact_helper.dart';
 import 'package:agenda_contatos/ui/contact_page.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+enum OrderOptions { orderaz, orderza }
 
 //2.16.2
 class HomePage extends StatefulWidget {
@@ -29,7 +32,21 @@ class _HomePageState extends State<HomePage> {
         title: Text('Contatos'),
         backgroundColor: Color.fromARGB(255, 228, 34, 20),
         centerTitle: true,
-        actions: [],
+        actions: <Widget>[
+          PopupMenuButton<OrderOptions>(
+            itemBuilder: (context) => <PopupMenuEntry<OrderOptions>>[
+              const PopupMenuItem<OrderOptions>(
+                child: Text('Ordernar de A-Z'),
+                value: OrderOptions.orderaz,
+              ),
+              const PopupMenuItem<OrderOptions>(
+                child: Text('Ordernar de Z-A'),
+                value: OrderOptions.orderza,
+              ),
+            ],
+            onSelected: _orderList,
+          ),
+        ],
       ),
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
@@ -100,7 +117,77 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       onTap: () {
-        _showContactPage(contact: contacts[index]);
+        _showOptions(context, index);
+      },
+    );
+  }
+
+  void _showOptions(BuildContext context, int index) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return BottomSheet(
+          onClosing: () {},
+          builder: (context) {
+            return Container(
+              padding: EdgeInsets.all(10.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: TextButton(
+                      child: Text(
+                        'Ligar',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 228, 34, 20),
+                          fontSize: 20.0,
+                        ),
+                      ),
+                      onPressed: () {
+                        launch('tel:${contacts[index].phone}');
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: TextButton(
+                      child: Text(
+                        'Editar',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 228, 34, 20),
+                          fontSize: 20.0,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _showContactPage(contact: contacts[index]);
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: TextButton(
+                      child: Text(
+                        'Excluir',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 228, 34, 20),
+                          fontSize: 20.0,
+                        ),
+                      ),
+                      onPressed: () {
+                        helper.deleteContact(contacts[index].id);
+                        contacts.removeAt(index);
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
       },
     );
   }
@@ -129,5 +216,21 @@ class _HomePageState extends State<HomePage> {
         (contacts = list);
       });
     });
+  }
+
+  void _orderList(OrderOptions result) {
+    switch (result) {
+      case OrderOptions.orderaz:
+        contacts.sort((a, b) {
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
+        break;
+      case OrderOptions.orderza:
+        contacts.sort((a, b) {
+          return b.name.toLowerCase().compareTo(a.name.toLowerCase());
+        });
+        break;
+    }
+    setState(() {});
   }
 }
