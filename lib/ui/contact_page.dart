@@ -19,6 +19,7 @@ class _ContactPageState extends State<ContactPage> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
 
+  //testando função de commit
   final _nameFocus = FocusNode();
 
   bool _userEdited = false;
